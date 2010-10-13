@@ -1,6 +1,6 @@
 # PubSub Subscribing for CouchDB
 
-Make CouchDB accept and store pubsub feeds!
+Make CouchDB accept and store pubsub feeds! Original concept by @rdfturtle (Tyler Gillies)
 
 # Why is this cool?
 
@@ -24,11 +24,9 @@ This is a CouchApp, which means that you'll have install the [CouchApp utility](
 
 Once you have the couchapp utility working, check out this repo and go into this folder and execute <code>couchapp init</code>.
 
-You'll have to have a CouchDB somewhere, but I'll assume you're working with a free Couch hosted by [CouchOne](http://couchone.com/get). Create a new empty database to host your feed. I'll call mine @awesome-events@. If you run @couchapp push http://your.couchone.com/awesome-events@ it will give your database some magical PubSubHubbubb sprinkles.
+You'll have to have a CouchDB somewhere, but I'll assume you're working with a free Couch hosted by [CouchOne](http://couchone.com/get). Create a new empty database to host your feed. I'll call mine <code>awesome-events</code>. If you run <code>couchapp push http://your.couchone.com/awesome-events</code> it will give your database some magical PubSubHubbubb sprinkles.
 
 Now we need to user Superfeedr to hook up a feed to dump into your new PubSubHubbubb enabled Couch database.
-
-Here's an ATOM feed of upcoming Portland tech events containing the word 'awesome': [http://calagator.org/events/search.atom?query=awesome](http://calagator.org/events/search.atom?query=awesome).
 
 Go get a free Subscriber account at [Superfeedr](http://superfeedr.com) and use the PubSubHubbubb console to make a new PUSH request. Set the Topic to the URL of your RSS or ATOM feed.
 
