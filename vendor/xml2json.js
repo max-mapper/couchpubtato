@@ -7,12 +7,13 @@ exports.xmlToJson = function(xml) {
   // this is nasty, but its rss, its supposed to be nasty
   // duck type rss vs atom
   if (feed.channel.length() > 0) {
+
     for (i = 0; i < feed.channel.item.length(); i++) {
       item = feed.channel.item[i];
       body = item.description.toString();
       date = new Date(item.pubDate.toString()).getTime();
       
-      if (!date) { 
+      if (!date) {  
        date = new Date().getTime();
       }	
       
@@ -34,10 +35,12 @@ exports.xmlToJson = function(xml) {
        date = new Date().getTime();
       }
         
+      var link = null;
+      if('link' in item) link = item.link[0].@href.toString();
       return {
         title : item.title.toString(),
         body  : body,
-        link  : item.link[0].@href.toString(),
+        link  : link,
         date : Math.round(date / 1000),
         sourceTitle : feed.title.toString()
       };
