@@ -18,6 +18,8 @@ With Couchpubtato, you can make any Couch database act like a valid PubSubHubbub
 
 Ok, so lets say you want to embed a feed of upcoming calendar events on your _sweet blog_, but the calendar page only has a junky RSS feed! You can use Superfeedr to push new RSS updates in realtime to a CouchDB of your choice, which turns your previously junky RSS feed into a full JSONP enabled API for maximum client side widget goodness!
 
+Here's an example of this whole thingy working: I log all Portland, OR 911 calls and make them available as ActivityStreams here: <code>http://max.couchone.com/pdx911/_design/push/_list/feed/recent?descending=true&limit=5</code>
+
 # ActivityStreams
 
 By default this will convert any incoming XML RSS/ATOM feed data into JSON [ActivityStreams](http://activitystrea.ms) format. ActivityStreams are the new hotness, pure XML ATOM/RSS is old and busted. Here's an example of an ActivityStreams formatted feed item:
