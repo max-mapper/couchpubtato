@@ -25,6 +25,7 @@ Here's an example of this whole thingy working: I log all Portland, OR 911 calls
 By default this will convert any incoming XML RSS/ATOM feed data into JSON [ActivityStreams](http://activitystrea.ms) format. ActivityStreams are the new hotness, pure XML ATOM/RSS is old and busted. Here's an example of an ActivityStreams formatted feed item:
 
     {
+       "postedTime":"2010-10-14T00:58:32Z",
        "object": {
            "permalinkUrl": "http://rss.cnn.com/~r/rss/cnn_latest/~3/s52R1lImWu0/index.html",
            "objectType": "article",
