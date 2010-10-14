@@ -1,5 +1,4 @@
 //this is adapted from @daleharvey's codez
-// TODO: Spec compliant with http://github.com/activitystreams/json-schema/
 
 exports.xmlToActivityStreamJson = function(xml) {
   function zeroPad(n) {
