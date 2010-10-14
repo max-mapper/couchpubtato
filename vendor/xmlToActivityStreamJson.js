@@ -2,13 +2,17 @@
 // TODO: Spec compliant with http://github.com/activitystreams/json-schema/
 
 exports.xmlToActivityStreamJson = function(xml) {
+  function zeroPad(n) {
+      return n < 10 ? '0' + n : n;
+  }
+  
   function rfc3339(date) {
     return date.getUTCFullYear()   + '-' +
-      f(date.getUTCMonth() + 1) + '-' +
-      f(date.getUTCDate())      + 'T' +
-      f(date.getUTCHours())     + ':' +
-      f(date.getUTCMinutes())   + ':' +
-      f(date.getUTCSeconds())   + 'Z';
+      zeroPad(date.getUTCMonth() + 1) + '-' +
+      zeroPad(date.getUTCDate())      + 'T' +
+      zeroPad(date.getUTCHours())     + ':' +
+      zeroPad(date.getUTCMinutes())   + ':' +
+      zeroPad(date.getUTCSeconds())   + 'Z';
   };
   
   var i, item, body, date, data,
