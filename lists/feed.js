@@ -1,12 +1,12 @@
 function(head, req){
+  start({
+    "headers": {
+      "Content-Type" : "application/json"
+     }
+  });
   var rows = [];
   while(row = getRow()){
     rows.push(row);
   }
-  return {
-    "headers" : {"Content-Type" : "application/json"},
-    "body" : JSON.stringify({
-       "items" : rows
-    })
-  }
+  send(JSON.stringify({"items" : rows}));
 }
