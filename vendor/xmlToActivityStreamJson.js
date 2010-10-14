@@ -27,9 +27,9 @@ exports.xmlToActivityStreamJson = function(xml) {
       item = feed.channel.item[i];
       body = item.description.toString();
       date = new Date(item.pubDate.toString());
-      
+
       if (!date) {  
-       date = new Date();
+        date = new Date();
       }	
       
       data = { 
@@ -44,14 +44,14 @@ exports.xmlToActivityStreamJson = function(xml) {
     default xml namespace="http://www.w3.org/2005/Atom";
     for each (item in feed..entry) { 
       body = item.content.toString();
-      date = new Date(item.updated.toString());
-      
-      if (!date) { 
-       date = new Date();
-      }
-        
-      var link = null;
+      dateString = item.updated.toString();
+      if (dateString == "") dateString = item.published.toString();
+      if (dateString == "") dateString = null;
+      date = new Date(dateString);
+
+      var link = "";
       if('link' in item) link = item.link[0].@href.toString();
+      
       data = {
         title : item.title.toString(),
         body  : body,
