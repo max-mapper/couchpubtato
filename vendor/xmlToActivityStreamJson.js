@@ -67,15 +67,15 @@ exports.xmlToActivityStreamJson = function(xml) {
   return {
      "postedTime" : data.data,
      "object" : {
-        "summary" : data.body,
+        "content" : data.body,
         "permalinkUrl" : data.link,
         "objectType" : "article",
-        "displayName" : data.title
+        "summary" : data.title
      },
      "verb" : "post",
      "actor" : {
         "permalinkUrl" : data.link,
-        "objectType" : "person",
+        "objectType" : "service",
         "displayName" : data.sourceTitle
      }
   }
