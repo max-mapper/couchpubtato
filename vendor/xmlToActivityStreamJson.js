@@ -14,7 +14,7 @@ exports.xmlToActivityStreamJson = function(xml) {
       zeroPad(date.getUTCSeconds())   + 'Z';
   };
   
-  var i, item, body, date, data,
+  var i, item, body, date, data = [],
       re   = /^<\?xml\s+version\s*=\s*(["'])[^\1]+\1[^?]*\?>/,
       str  = xml.replace(re, ""),
       feed = new XML(str);
@@ -32,13 +32,21 @@ exports.xmlToActivityStreamJson = function(xml) {
         date = new Date();
       }	
       
-      data = { 
-        title : item.title.toString(),
-        body  : body,
-        link  : item.link.toString(),
-        date : rfc3339(date),
-        sourceTitle : feed.channel.title.toString()
-      };
+      data = data.concat({
+        "postedTime" : rfc3339(date),
+        "object" : {
+          "content" : body,
+          "permalinkUrl" : item.link.toString(),
+          "objectType" : "article",
+          "summary" : item.title.toString()
+        },
+        "verb" : "post",
+        "actor" : {
+          "permalinkUrl" : link,
+          "objectType" : "service",
+          "displayName" : feed.channel.title.toString()
+        }
+      });
     }
   } else {
     default xml namespace="http://www.w3.org/2005/Atom";
@@ -52,30 +60,22 @@ exports.xmlToActivityStreamJson = function(xml) {
       var link = "";
       if('link' in item) link = item.link[0].@href.toString();
       
-      data = {
-        title : item.title.toString(),
-        body  : body,
-        link  : link,
-        date : rfc3339(date),
-        sourceTitle : feed.title.toString()
-      };
-      
+      data = data.concat({
+        "postedTime" : rfc3339(date),
+        "object" : {
+          "content" : body,
+          "permalinkUrl" : link,
+          "objectType" : "article",
+          "summary" : item.title.toString()
+        },
+        "verb" : "post",
+        "actor" : {
+          "permalinkUrl" : link,
+          "objectType" : "service",
+          "displayName" : feed.title.toString()
+        }
+      });
     }
   }
-  
-  return {
-     "postedTime" : data.date,
-     "object" : {
-        "content" : data.body,
-        "permalinkUrl" : data.link,
-        "objectType" : "article",
-        "summary" : data.title
-     },
-     "verb" : "post",
-     "actor" : {
-        "permalinkUrl" : data.link,
-        "objectType" : "service",
-        "displayName" : data.sourceTitle
-     }
-  }
+  return data;
 }
