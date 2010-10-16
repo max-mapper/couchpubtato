@@ -1,5 +1,5 @@
 function(doc) {
-  if (doc.postedTime) {
-    emit(doc.postedTime, doc);
+  if (doc.feed[0].postedTime) {
+    emit(doc.feed[0].postedTime, doc);
   }
 }

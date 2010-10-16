@@ -6,7 +6,7 @@
   },
   {
     "from":"xml",
-    "to": "_update/test",
+    "to": "_update/save",
     "method": "POST"
   }
 ]

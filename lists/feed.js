@@ -4,14 +4,17 @@ function(head, req){
   var started = false;
   send("{\"items\": [\n");
   while(row = getRow()){
-    if(started) send(",\n");
-    send(JSON.stringify({
-      postedTime: row.value.postedTime,
-      object: row.value.object,
-      actor: row.value.actor,
-      verb: row.value.verb
-    }));
-    started = true;
+    for(var item in row.value.feed){
+      item = row.value.feed[item];
+      if(started) send(",\n");
+      send(JSON.stringify({
+        postedTime: item.postedTime,
+        object: item.object,
+        actor: item.actor,
+        verb: item.verb
+      }));
+      started = true; 
+    }
   }
   send("]}\n");
   if ('callback' in req.query) send(")");
