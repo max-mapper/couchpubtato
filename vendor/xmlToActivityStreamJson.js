@@ -32,13 +32,17 @@ exports.xmlToActivityStreamJson = function(xml) {
         date = new Date();
       }	
       
-      data = data.concat({
+      var geo = new Namespace('http://www.georss.org/georss');
+      var location = item..geo::point.toString().split(' ');
+      
+      var parsed = {
         "postedTime" : rfc3339(date),
         "object" : {
           "content" : body,
           "permalinkUrl" : item.link.toString(),
           "objectType" : "article",
-          "summary" : item.title.toString()
+          "summary" : item.title.toString(),
+          "location" : location
         },
         "verb" : "post",
         "actor" : {
@@ -46,19 +50,27 @@ exports.xmlToActivityStreamJson = function(xml) {
           "objectType" : "service",
           "displayName" : feed.channel.title.toString()
         }
-      });
+      }
+      
+      if ()
+      
+      data = data.concat();
     }
   } else {
     default xml namespace="http://www.w3.org/2005/Atom";
     for each (item in feed..entry) { 
       body = item.content.toString();
-      dateString = item.updated.toString();
+      var dateString = item.updated.toString();
       if (dateString == "") dateString = item.published.toString();
       if (dateString == "") dateString = null;
+      
       date = new Date(dateString);
 
       var link = "";
       if('link' in item) link = item.link[0].@href.toString();
+      
+      var geo = new Namespace('http://www.georss.org/georss');
+      var location = item..geo::point.toString().split(' ');
       
       data = data.concat({
         "postedTime" : rfc3339(date),
@@ -66,7 +78,8 @@ exports.xmlToActivityStreamJson = function(xml) {
           "content" : body,
           "permalinkUrl" : link,
           "objectType" : "article",
-          "summary" : item.title.toString()
+          "summary" : item.title.toString(),
+          "location" : location
         },
         "verb" : "post",
         "actor" : {
