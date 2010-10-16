@@ -52,8 +52,6 @@ exports.xmlToActivityStreamJson = function(xml) {
         }
       }
       
-      if ()
-      
       data = data.concat();
     }
   } else {
