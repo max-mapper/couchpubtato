@@ -57,7 +57,17 @@ For the Callback field, here's what to enter:
 
     http://your.couchone.com/awesome-events/_design/push/_rewrite/xml
     
-When you submit the request on Superfeedr, it should say that everything worked okay. Now any feed updates will get sent to your Couch and will be converted and saved as JSON ActivityStreams objects.
+When you submit the request on Superfeedr, it should say that everything worked okay. 
+
+You can also obviously use the regular [PubSubHubbub protocol](http://code.google.com/p/pubsubhubbub/) (that is actually being used by the console) by doing a call like this :
+
+<code>
+$ curl -X POST http://superfeedr.com/hubbub -u'<superfeedr_user>:<superfeedr_password> -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=<feed url> -d'hub.callback=http://your.couchone.com/awesome-events/_design/push/_rewrite/xml' -D-
+</code>
+
+It should return a <code>204</code> if everything was fine, and if not, it will indicate what was wrong in the BODY. There exists PubSubHubbub libraries in many languages.
+
+Now any feed updates will get sent to your Couch and will be converted and saved as JSON ActivityStreams objects.
 
 # License
 
