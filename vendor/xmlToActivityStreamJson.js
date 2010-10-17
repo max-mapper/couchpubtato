@@ -88,5 +88,10 @@ exports.xmlToActivityStreamJson = function(xml) {
       });
     }
   }
-  return data;
+  return data.concat({
+    "feedMeta" : {
+      "link" : feed.link[0].@href.toString(),
+      "raw" : xml
+    }
+  });
 }
