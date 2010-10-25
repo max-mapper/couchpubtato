@@ -1,4 +1,5 @@
 {
   "name": "CouchApp PubSubHubbub Subscriptions",
-  "description": "A Simple CouchApp PubSub Subscriber"
+  "description": "A Simple CouchApp PubSub Subscriber",
+  "index":"feeds.html"
 }

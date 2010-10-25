@@ -1,12 +1,22 @@
 [
   {
-    "from": "xml",
-    "to": "_show/challenge",
-    "method": "GET"
+    "from"   : "feeds/:_id/entries",
+    "to"     : "_show/challenge",
+    "method" : "GET"
   },
   {
-    "from":"xml",
-    "to": "_update/save",
-    "method": "POST"
+    "from"   : "feeds/:_id/entries",
+    "to"     : "_update/entries/:_id",
+    "method" : "POST"
+  },
+  {
+    "from"   : "feeds/:_id",
+    "to"     : "_show/feed",
+    "method" : "GET"
+  },
+  {
+    "from"   : "feeds",
+    "to"     : "_update/feeds",
+    "method" : "POST"
   }
 ]

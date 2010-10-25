@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<!-- 
+ This is the page that lists all the feeds to which the user subscribed.
+ It should allow for more subscriptions too.
+-->
+<html>
+<head>
+    <link rel="stylesheet" href="styles/main.css" type="text/css" />
+    <script type="text/javascript" src="scripts/jquery-1.4.3.min.js"></script>
+    <script type="text/javascript">
+
+    </script>
+    <title>Subscribed feeds</title>
+</head>
+<body>
+    <h1>Subscribed feeds</h1>
+    <h2>Subscribe to new feed</h2>
+    <form id="subscribe">
+        <p>
+            <label>URL:</label><br />
+            <input type="text" name="url" id="url" size="180" value="http://superfeedr.tumblr.com/rss" />
+        </p>
+        <p>
+            <input type="submit">
+        </p>
+    </form>
+    <!-- 
+        Since couchapps cannot actually HTTP calls (design choice), we need to perform the subscription from the web browser.
+        First, we need to create the feed, and get the id for this feed to build the callback.
+        Once the feed is created, we can then perform the PubSubHubbub subscription.
+        Of course the UI needs some work :) and we may also want to mark the feed when it is subscribed.
+    -->
+    <script>
+    $('#subscribe').submit(function() {
+        var feed_url = $('#url').val();
+        
+        jQuery.post("_update/feeds", { url: feed_url}, function(feed_id) {
+            alert("Feed created! Subscribing now.")
+            // Then, we need to extract the hub url, if applicable. 
+            var callback = "http://superfeedr.couchone.com/push/_design/push/_rewrite/feeds/" + feed_id + "/entries";
+            var url = "http://pubsubjubhub.appspot.com/?hub.topic=" + feed_url + "&hub.callback=" + callback;
+            jQuery.getJSON(url+"&callback=?", function(data) {
+                if(data.code == 204) {
+                    alert("Successfully subscribed to feed");
+                }
+                else {
+                    alert("Couldn't subscribe to hub " + data.code + " - " + data.body);
+                }
+            });
+        });
+        return false;
+    });
+    </script>
+</body>
+</html>
