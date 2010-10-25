@@ -7,7 +7,7 @@ exports.xmlToActivityStreamJson = function(xml) {
   
   function rfc3339(date) {
     return date.getUTCFullYear()   + '-' +
-      zeroPad(date.getUTCMonth() + 1) + '-' +
+      zeroPad(date.getUTCMonth()   + 1) + '-' +
       zeroPad(date.getUTCDate())      + 'T' +
       zeroPad(date.getUTCHours())     + ':' +
       zeroPad(date.getUTCMinutes())   + ':' +
@@ -57,7 +57,10 @@ exports.xmlToActivityStreamJson = function(xml) {
   } else {
     default xml namespace="http://www.w3.org/2005/Atom";
     for each (item in feed..entry) { 
-      body = item.content.toString();
+      body  = item.content.toString();
+      title = item.title.toString();
+      id    = item.id.toString();
+      
       var dateString = item.updated.toString();
       if (dateString == "") dateString = item.published.toString();
       if (dateString == "") dateString = null;
@@ -68,9 +71,17 @@ exports.xmlToActivityStreamJson = function(xml) {
       if('link' in item) link = item.link[0].@href.toString();
       
       var geo = new Namespace('http://www.georss.org/georss');
-      var location = item..geo::point.toString().split(' ');
+      var location = item..geo::point.toString().split(',');
+      
+      var categories = []
+      for each (cat in item..category) {
+        categories.push(cat.@term.toString());
+      }
       
       data = data.concat({
+        "title" : title,
+        "id" : id,
+        "categories" : categories,
         "postedTime" : rfc3339(date),
         "object" : {
           "content" : body,
@@ -84,14 +95,10 @@ exports.xmlToActivityStreamJson = function(xml) {
           "permalinkUrl" : link,
           "objectType" : "service",
           "displayName" : feed.title.toString()
-        }
+        },
+        "xml" : item.toString()
       });
     }
   }
-  return data.concat({
-    "feedMeta" : {
-      "link" : feed.link[0].@href.toString(),
-      "raw" : xml
-    }
-  });
+  return data;
 }

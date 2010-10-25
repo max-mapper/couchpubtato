@@ -5,6 +5,10 @@
 function(doc, req){
   var lib             = require('vendor/xmlToActivityStreamJson');
   doc['updated_at']   = new Date().getTime();
-  doc['entries'].push(lib.xmlToActivityStreamJson(req.body));
+  entries = lib.xmlToActivityStreamJson(req.body);
+  for (var i=0;i<=entries.length;i=i+1)
+  {
+    doc['entries'].push(entries[i]);
+  }  
   return [doc, "thx!"]
 }
