@@ -39,34 +39,39 @@ By default this will convert any incoming XML RSS/ATOM feed data into JSON [Acti
        }
     }
 
-# How-to
+# Quick install
 
-You can use any CouchDB hosted pubicly (so that Superfeedr can post updates to it), but I'll assume you're working with a free Couch hosted by [CouchOne](http://couchone.com/get).
+* Get a free hosted Couch from [CouchOne](http://couchone.com/get) and a free Superfeedr subscriber account from [Superfeedr](http://superfeedr.com)
+* Download [https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json](https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json)
+* Make a new database on your couch: <code>curl -X PUT http://YOURCOUCH/DBNAME</code>
+* Upload Couchpubtato to the new db: <code>curl -X PUT http://YOURCOUCH/DBNAME/_design/push -H "Content-type: application/json" -d @couchpubtato.json</code>
+* Tell Superfeedr to store an XML feed in your Couch: <code>curl -X POST http://superfeedr.com/hubbub -u'SUPERFEEDRUSERNAME:SUPERFEEDRPASSWORD' -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=YOURFEEDURL' -d'hub.callback=http://YOURCOUCH/DBNAME/_design/push/_rewrite/xml' -D-</code>
 
-Couchpubtato is a CouchApp, which means that you'll have install the [CouchApp command line utility](http://couchapp.org/page/installing) to deploy it.
+# In-depth install
 
-Once you have the couchapp utility working, <code>git clone</code> this repo and go into this folder and execute <code>couchapp init</code>.
+You can use any CouchDB hosted pubicly (so that Superfeedr can post updates to it), but I'll assume you're working with a free Couch hosted by [CouchOne](http://couchone.com/get). You'll have to create a new database to store your data. I'll call mine <code>awesome-events</code>. You can do this from http://YOURCOUCH/_utils.
 
-You'll have to create a new database to store your data. I'll call mine <code>awesome-events</code>. When you run <code>couchapp push http://your.couchone.com/awesome-events</code> it will enhance your new database with the magical PubSubHubbubb sprinkles contained in Couchpubtato and teach your database how to store PubSubHubbubb data.
+You can either download [couchpubtato.json](https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json) (quickest option) or, if you want to hack on the Couchpubtato source code first, you'll need to install the [CouchApp command line utility](http://couchapp.org/page/installing) and check out this repo.
+
+If you want to hack on Couchpubtato/build it yourself, once you have the couchapp utility working, <code>git clone</code> this repo and go into this folder and execute <code>couchapp init</code>. To upload Couchpubtato into your couch just run <code>couchapp push http://YOURCOUCH/DATABASENAME</code>. Otherwise see the Quick install section above.
+
+When you push Couchpubtato into your Couch it will enhance your new database with the magical PubSubHubbubb sprinkles contained in Couchpubtato and teach your database how to store PubSubHubbubb data.
 
 Once your database is ready to store data, we need to use Superfeedr to hook up a feed to dump into your new PubSubHubbubb enabled Couch database.
 
-Go get a free Subscriber account at [Superfeedr](http://superfeedr.com) and use the PubSubHubbubb console to make a new PUSH request. Set the Topic to the URL of your RSS or ATOM feed.
+Now go get a free Subscriber account at [Superfeedr](http://superfeedr.com)
 
-For the Callback field, here's what to enter:
+To subscribe to a feed, use the following <code>curl</code> command:
 
-    http://your.couchone.com/awesome-events/_design/push/_rewrite/xml
-    
-When you submit the request on Superfeedr, it should say that everything worked okay. 
+<code>curl -X POST http://superfeedr.com/hubbub -u'SUPERFEEDRUSERNAME:SUPERFEEDRPASSWORD' -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=YOURFEEDURL' -d'hub.callback=http://YOURCOUCH/DATABASENAME/_design/push/_rewrite/xml' -D-</code>
 
-You can also obviously use the regular [PubSubHubbub protocol](http://code.google.com/p/pubsubhubbub/) (that is actually being used by the console) by doing a call like this :
-
-
-    $ curl -X POST http://superfeedr.com/hubbub -u'<superfeedr_user>:<superfeedr_password> -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=<feed url> -d'hub.callback=http://your.couchone.com/awesome-events/_design/push/_rewrite/xml' -D-
-
-It should return a <code>204</code> if everything was fine, and if not, it will indicate what was wrong in the BODY. There exists PubSubHubbub libraries in many languages.
+It should return a <code>204</code> if everything was fine, and if not, it will indicate what was wrong in the BODY. If you don't like curl, there also exist PubSubHubbub libraries in many languages.
 
 Now any feed updates will get sent to your Couch and will be converted and saved as JSON ActivityStreams objects.
+
+# Known issues
+
+Superfeedr will send multiple feed updates in a single update, so if 3 new items were posted to your feed, it will send a single XML update containing 3 items. Couch currently can only create a single document for each update, so you may see documents that contain multiple feed items. A more desirable situation would be a 1:1 ratio of documents in Couch to feed items.
 
 # License
 
