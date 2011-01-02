@@ -1,4 +1,4 @@
-function(head, req){ 
+function(head, req){
   start({"headers": {"Content-Type" : "application/json;charset=utf-8"}});
   if ('callback' in req.query) send(req.query['callback'] + "(");
   var started = false;
