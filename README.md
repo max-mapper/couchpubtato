@@ -42,16 +42,15 @@ By default this will convert any incoming XML RSS/ATOM feed data into JSON [Acti
 # Quick install
 
 * Get a free hosted Couch from [CouchOne](http://couchone.com/get) and a free Superfeedr subscriber account from [Superfeedr](http://superfeedr.com)
-* Download [https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json](https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json)
 * Make a new database on your couch: <code>curl -X PUT http://YOURCOUCH/DBNAME</code>
-* Upload Couchpubtato to the new db: <code>curl -X PUT http://YOURCOUCH/DBNAME/\_design/push -H "Content-type: application/json" -d @couchpubtato.json</code>
+* Copy Couchpubtato to the new db: <code>curl -X POST http://YOURCOUCH/\_replicate -d '{"source":"http://max.couchone.com/apps","target":"apps", "doc\_ids":["_design/push"]}'</code>
 * Tell Superfeedr to store an XML feed in your Couch: <code>curl -X POST http://superfeedr.com/hubbub -u'SUPERFEEDRUSERNAME:SUPERFEEDRPASSWORD' -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=YOURFEEDURL' -d'hub.callback=http://YOURCOUCH/DBNAME/\_design/push/_rewrite/xml' -D-</code>
 
 # In-depth install
 
 You can use any CouchDB hosted pubicly (so that Superfeedr can post updates to it), but I'll assume you're working with a free Couch hosted by [CouchOne](http://couchone.com/get). You'll have to create a new database to store your data. I'll call mine <code>awesome-events</code>. You can do this from http://YOURCOUCH/_utils.
 
-You can either download [couchpubtato.json](https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json) (quickest option) or, if you want to hack on the Couchpubtato source code first, you'll need to install the [CouchApp command line utility](http://couchapp.org/page/installing) and check out this repo.
+You can either replicate the couchapp from my couch [max.couchone.com/apps/_design/push](http://max.couchone.com/apps/_design/push) (quickest option) or, if you want to hack on the Couchpubtato source code first, you'll need to install the [CouchApp command line utility](http://couchapp.org/page/installing) and check out this repo.
 
 If you want to hack on Couchpubtato/build it yourself, once you have the couchapp utility working, <code>git clone</code> this repo and go into this folder and execute <code>couchapp init</code>. To upload Couchpubtato into your couch just run <code>couchapp push http://YOURCOUCH/DATABASENAME</code>. Otherwise see the Quick install section above.
 
