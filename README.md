@@ -44,7 +44,7 @@ By default this will convert any incoming XML RSS/ATOM feed data into JSON [Acti
 * Get a free hosted Couch from [CouchOne](http://couchone.com/get) and a free Superfeedr subscriber account from [Superfeedr](http://superfeedr.com)
 * Download [https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json](https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json)
 * Make a new database on your couch: <code>curl -X PUT http://YOURCOUCH/DBNAME</code>
-* Upload Couchpubtato to the new db: <code>curl -X PUT http://YOURCOUCH/DBNAME/_design/push -H "Content-type: application/json" -d @couchpubtato.json</code>
+* Upload Couchpubtato to the new db: <code>curl -X PUT http://YOURCOUCH/DBNAME/\_design/push -H "Content-type: application/json" -d @couchpubtato.json</code>
 * Tell Superfeedr to store an XML feed in your Couch: <code>curl -X POST http://superfeedr.com/hubbub -u'SUPERFEEDRUSERNAME:SUPERFEEDRPASSWORD' -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=YOURFEEDURL' -d'hub.callback=http://YOURCOUCH/DBNAME/\_design/push/_rewrite/xml' -D-</code>
 
 # In-depth install
@@ -63,7 +63,7 @@ Now go get a free Subscriber account at [Superfeedr](http://superfeedr.com)
 
 To subscribe to a feed, use the following <code>curl</code> command:
 
-<code>curl -X POST http://superfeedr.com/hubbub -u'SUPERFEEDRUSERNAME:SUPERFEEDRPASSWORD' -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=YOURFEEDURL' -d'hub.callback=http://YOURCOUCH/DATABASENAME/_design/push/_rewrite/xml' -D-</code>
+<code>curl -X POST http://superfeedr.com/hubbub -u'SUPERFEEDRUSERNAME:SUPERFEEDRPASSWORD' -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=YOURFEEDURL' -d'hub.callback=http://YOURCOUCH/DATABASENAME/\_design/push/_rewrite/xml' -D-</code>
 
 It should return a <code>204</code> if everything was fine, and if not, it will indicate what was wrong in the BODY. If you don't like curl, there also exist PubSubHubbub libraries in many languages.
 
