@@ -45,7 +45,7 @@ By default this will convert any incoming XML RSS/ATOM feed data into JSON [Acti
 * Download [https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json](https://github.com/downloads/maxogden/couchpubtato/couchpubtato.json)
 * Make a new database on your couch: <code>curl -X PUT http://YOURCOUCH/DBNAME</code>
 * Upload Couchpubtato to the new db: <code>curl -X PUT http://YOURCOUCH/DBNAME/_design/push -H "Content-type: application/json" -d @couchpubtato.json</code>
-* Tell Superfeedr to store an XML feed in your Couch: <code>curl -X POST http://superfeedr.com/hubbub -u'SUPERFEEDRUSERNAME:SUPERFEEDRPASSWORD' -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=YOURFEEDURL' -d'hub.callback=http://YOURCOUCH/DBNAME/_design/push/_rewrite/xml' -D-</code>
+* Tell Superfeedr to store an XML feed in your Couch: <code>curl -X POST http://superfeedr.com/hubbub -u'SUPERFEEDRUSERNAME:SUPERFEEDRPASSWORD' -d'hub.mode=subscribe' -d'hub.verify=sync' -d'hub.topic=YOURFEEDURL' -d'hub.callback=http://YOURCOUCH/DBNAME/\_design/push/_rewrite/xml' -D-</code>
 
 # In-depth install
 
