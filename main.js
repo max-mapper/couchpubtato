@@ -1,4 +1,4 @@
-// from https://github.com/szayat/node.couch.js
+// adapted from https://github.com/szayat/node.couch.js
 
 var request = require('request')
   , sys = require('sys')
@@ -100,34 +100,51 @@ function createDatabaseListener (uri, db) {
 function createService (uri, interval) {
   if (uri[uri.length - 1] !== '/') uri += '/';
   var dbs = {};
-  var service = {};
   
   var setup = function () {
     var starttime = new Date();
     request({uri:uri+'_all_dbs', headers:headers}, function (error, resp, body) {
       if (error) throw error;
-      if (resp.statusCode > 299) throw new Error("Response error "+sys.inspect(resp)+'\n'+body)
-      JSON.parse(body).forEach(function (db) {
+      if (resp.statusCode > 299) throw new Error("Response error "+sys.inspect(resp)+'\n'+body);
+      
+      var dbs = JSON.parse(body);
+      dbs.forEach(function (db) {
         if (!dbs[db]) {
-          dbs[db] = createDatabaseListener(uri+db);
-          // deal with deleted database. TODO: I'm I leaking memory somewhere??
-          if ( ! dbs[db] )
-            delete deb[db];
-          else
-            if (service.onDatabase) server.onDatabase(db, dbs[db]);
+          dbs[db] = createDatabaseListener(uri+db);  
+                sys.debug(sys.inspect(dbs[db]))  
         }
       })
+      
+      // function isEmpty(ob){
+      //    for(var i in ob){ return false;}
+      //   return true;
+      // }
+      // 
+      // request({uri:uri+"feeds"+'/_design/couchapp/_view/unique'}, 
+      //   function (err, resp, body) {
+      //     // if (err) throw err;
+      //     if (resp.statusCode > 299) throw new Error("Response error "+sys.debug(resp)+'\n'+body);
+      //     var rows = JSON.parse(body).rows;
+      //     dbs.forEach(function (db) {
+      //       if(!isEmpty(dbs[db].ddocs)) {
+      //         rows.forEach(function (row) {
+      //           sys.debug(sys.inspect(dbs[db]));
+      //           dbs[db].ddocs[row.value._id]._changes_process().stdin.write(JSON.stringify(["trigger", uri])+'\n');
+      //         });
+      //       }
+      //     })
+      //   }
+      // )
+      // 
+    
       var endtime = new Date();
       setTimeout(setup, interval ? interval : (((endtime - starttime) * 5) + 1000));
     })
   }
   setup();
-  
-  return service;
 }
 
 if (require.main == module) {
   var uri = process.argv[process.argv.length - 1];
-  sys.puts('Finding changes listeners on '+uri)
   createService(uri);
 }

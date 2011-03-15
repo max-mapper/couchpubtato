@@ -2,6 +2,7 @@
 
 var Script = process.binding('evals').Script;
 var stdin = process.openStdin();
+var vm = require('vm');
 
 stdin.setEncoding('utf8');
 
@@ -13,9 +14,9 @@ var loadModule = function (doc) {
               + doc.changes
               + "\n});";
               
-  var module = {exports:{},id:'changes'}
+  var module = {exports:{},id:'changes'};
   
-  var compiledWrapper = process.compile(wrapper, doc.changes);
+  var compiledWrapper = vm.runInThisContext(wrapper);
   var p = compiledWrapper.apply(doc, [module.exports, require, module]);
   return module.exports;
 }
@@ -29,7 +30,9 @@ stdin.on('data', function (chunk) {
     if ((obj[0]) === "ddoc") {
       listener = loadModule(obj[1]).listener;
     } else if (obj[0] === "change") {
-      listener(obj[1],obj[2]);
+      listener(obj[1], obj[2]);
+    } else if (obj[0] === "trigger") {
+      listener(null, obj[1]);
     }
   }
 });
