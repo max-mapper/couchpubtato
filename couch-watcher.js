@@ -1,3 +1,5 @@
+// adapted from https://github.com/szayat/node.couch.js
+
 var request = require('request')
   , sys = require('sys')
   , events = require('events')
@@ -23,7 +25,7 @@ function createDatabaseListener (uri, db) {
         db.onDesignDoc(change.doc);
       } 
       db.ids.forEach(function (id) {
-        db.ddocs[id]._changes_process().stdin.write(JSON.stringify(["change", change, uri ])+'\n');
+        db.ddocs[id]._changes_process().stdin.write(JSON.stringify(["change", change.doc ])+'\n');
       })
     }
     , onDesignDoc: function (doc) {
@@ -42,7 +44,7 @@ function createDatabaseListener (uri, db) {
         if (doc.changes) {
           // start up the process
           sys.puts("Starting process for "+doc._id)
-          var p = child.spawn(process.execPath, [path.join(__dirname, 'child.js')]);
+          var p = child.spawn(process.execPath, [path.join(__dirname, 'db-watcher.js')]);
           p.stderr.on("data", function (chunk) {sys.error("data error: " + chunk.toString())})
           p.stdin.write(JSON.stringify(["ddoc", doc])+'\n');
           db.ddocs[doc._id]._changes_process = function(){return p};
