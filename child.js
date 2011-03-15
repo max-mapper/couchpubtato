@@ -1,8 +1,8 @@
 // from https://github.com/szayat/node.couch.js
 
-var Script = process.binding('evals').Script;
 var stdin = process.openStdin();
 var vm = require('vm');
+var sys = require('sys');
 
 stdin.setEncoding('utf8');
 
@@ -31,8 +31,6 @@ stdin.on('data', function (chunk) {
       listener = loadModule(obj[1]).listener;
     } else if (obj[0] === "change") {
       listener(obj[1], obj[2]);
-    } else if (obj[0] === "trigger") {
-      listener(null, obj[1]);
     }
   }
 });

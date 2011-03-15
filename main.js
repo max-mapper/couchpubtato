@@ -1,5 +1,3 @@
-// adapted from https://github.com/szayat/node.couch.js
-
 var request = require('request')
   , sys = require('sys')
   , events = require('events')
@@ -8,6 +6,8 @@ var request = require('request')
   , child = require('child_process')
   , url = require('url')
   ;
+
+function log(obj) { return sys.debug(sys.inspect(obj))}
 
 var headers = {'content-type':'application/json', 'accept':'application/json'}
 
@@ -43,10 +43,10 @@ function createDatabaseListener (uri, db) {
           // start up the process
           sys.puts("Starting process for "+doc._id)
           var p = child.spawn(process.execPath, [path.join(__dirname, 'child.js')]);
-          p.stderr.on("data", function (chunk) {sys.error(chunk.toString())})
+          p.stderr.on("data", function (chunk) {sys.error("data error: " + chunk.toString())})
           p.stdin.write(JSON.stringify(["ddoc", doc])+'\n');
           db.ddocs[doc._id]._changes_process = function(){return p};
-          db.ids.push(doc._id)
+          db.ids.push(doc._id);
         }
       }
     }
@@ -82,8 +82,10 @@ function createDatabaseListener (uri, db) {
     qs = querystring.stringify({include_docs: "true", feed: 'continuous', since: db.seq})
     request({uri:uri+'/_changes?'+qs, responseBodyStream:changesStream}, function (err, resp, body) {
       if ( err ) 
-        sys.debug(JSON.stringify(err));
+        sys.debug("changes error: " + JSON.stringify(err));
     });
+    qs = querystring.stringify({include_docs: "true", feed: 'continuous', since: db.seq})
+    
     request({uri:uri+'/_all_docs?startkey=%22_design%2F%22&endkey=%22_design0%22&include_docs=true'}, 
       function (err, resp, body) {
         if (err) throw err;
@@ -100,51 +102,49 @@ function createDatabaseListener (uri, db) {
 function createService (uri, interval) {
   if (uri[uri.length - 1] !== '/') uri += '/';
   var dbs = {};
+  var service = {};
   
   var setup = function () {
     var starttime = new Date();
     request({uri:uri+'_all_dbs', headers:headers}, function (error, resp, body) {
       if (error) throw error;
-      if (resp.statusCode > 299) throw new Error("Response error "+sys.inspect(resp)+'\n'+body);
-      
-      var dbs = JSON.parse(body);
-      dbs.forEach(function (db) {
+      if (resp.statusCode > 299) throw new Error("Response error "+sys.inspect(resp)+'\n'+body)
+      JSON.parse(body).forEach(function (db) {
         if (!dbs[db]) {
-          dbs[db] = createDatabaseListener(uri+db);  
-                sys.debug(sys.inspect(dbs[db]))  
+          dbs[db] = createDatabaseListener(uri+db);
+        }
+        if(dbs[db].ids.length > 0) {          
+          request({uri:uri+db+'/_design/couchpubtato/_view/unique', headers:headers}, 
+            function (err, resp, body) {
+              if (err) throw err;
+              if (resp.statusCode > 299) throw new Error("Response error "+sys.debug(resp)+'\n'+body);
+              var rows = JSON.parse(body).rows;
+              rows.forEach(function (row) {
+                dbs[db].ids.forEach(function(id) {
+                  var doc = row.value[0];
+                  change = { 
+                      'id': doc._id
+                		, 'changes': [{'rev': doc._rev}]
+                		, 'doc': doc
+              		}
+                  dbs[db].ddocs[id]._changes_process().stdin.write(JSON.stringify(["change", change, uri])+'\n');
+                })
+              });
+            }
+          )
         }
       })
-      
-      // function isEmpty(ob){
-      //    for(var i in ob){ return false;}
-      //   return true;
-      // }
-      // 
-      // request({uri:uri+"feeds"+'/_design/couchapp/_view/unique'}, 
-      //   function (err, resp, body) {
-      //     // if (err) throw err;
-      //     if (resp.statusCode > 299) throw new Error("Response error "+sys.debug(resp)+'\n'+body);
-      //     var rows = JSON.parse(body).rows;
-      //     dbs.forEach(function (db) {
-      //       if(!isEmpty(dbs[db].ddocs)) {
-      //         rows.forEach(function (row) {
-      //           sys.debug(sys.inspect(dbs[db]));
-      //           dbs[db].ddocs[row.value._id]._changes_process().stdin.write(JSON.stringify(["trigger", uri])+'\n');
-      //         });
-      //       }
-      //     })
-      //   }
-      // )
-      // 
-    
       var endtime = new Date();
       setTimeout(setup, interval ? interval : (((endtime - starttime) * 5) + 1000));
     })
   }
   setup();
+  
+  return service;
 }
 
 if (require.main == module) {
   var uri = process.argv[process.argv.length - 1];
+  sys.puts('Finding changes listeners on '+uri)
   createService(uri);
 }
