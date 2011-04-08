@@ -8,6 +8,8 @@ var fs = require('fs'),
     headers = {'content-type':'application/json', 'accept':'application/json'},
     stdin = process.openStdin(),
     buffer = '',
+    feedDoc = {},
+    fetchCount = 1,
     debug = false;
     
     // for debugging. run via: node feed-archiver.js debug
@@ -21,19 +23,31 @@ var fs = require('fs'),
       })
     }
 
-function processFeed(feedUrl, feedSaveFunc) {
+function processFeed(feedUrl, callback) {
   var feed = url.parse(feedUrl);
+  if (debug) sys.debug("executing fetch #" + fetchCount + " for " + feedUrl);
   request({uri:feed.href, headers: {'host' : feed.host}}, function (error, resp, body) {
     if (error) throw error;
     jsdom.env(body, ['jquery.js', 'jfeed.js', 'jatom.js', 'jfeeditem.js', 'jrss.js'], function(errors, window) {
-      if (window.$("channel").length > 0) {
-        var jf = new window.JFeed(window.document);
-        feedSaveFunc(jf.items);
-      } else {
-        sys.log(feedUrl + " had no channel entries");
-      }
+      var jf = new window.JFeed(window.document);
+      callback(jf);
     });
   })
+}
+
+function saveMetadata(feed, doc) {
+  doc.type = feed.type;
+  doc.version = feed.version;
+  doc.title = feed.title;
+  doc.link = feed.link;
+  doc.description = feed.description;
+  var feedDoc = doc.couch + "/" + feedDB + "/" + doc._id;
+  request({ method: "put", uri:feedDoc, body: JSON.stringify(doc), headers:headers},
+    function(err, resp, body) {
+      if (err) return sys.error(err.stack);
+      if (debug) sys.debug("saved feed doc: " + JSON.stringify(body));
+    }
+  );
 }
 
 function saveItem(item, couch, db, uniqueKey) {
@@ -47,7 +61,7 @@ function saveItem(item, couch, db, uniqueKey) {
         request({ method: "put", uri:doc_uri, body: JSON.stringify(item), headers:headers},
           function(err, resp, body) {
             if (err) return sys.error(err.stack);
-            sys.log(body);
+            if (debug) sys.debug("saved " + body);
           }
         );
       }
@@ -55,26 +69,46 @@ function saveItem(item, couch, db, uniqueKey) {
   });
 }
 
-function fetchFeed (doc) {
+function fetchFeed() {
+  var doc = feedDoc;
   var starttime = new Date();   
-  function feedSaveFunc(data) {
-    for (var item in data) {
-      saveItem(data[item], doc.couch, doc.db, "description");
+  processFeed(doc.feed, function(feed) {
+    if ( feed.type === '' && debug ) sys.debug("could not identify feed type for " + doc.feed);
+    if ( fetchCount === 1 ) {
+      saveMetadata(feed, feedDoc);
+      fetchCount++;
+    } else {
+      fetchCount++;
     }
-  }
-  processFeed(doc.feed, feedSaveFunc);
+    var items = feed.items;
+    if (items) {
+      for (var item in items) {
+        saveItem(items[item], doc.couch, doc.db, "description");
+      } 
+    }
+  });
   var endtime = new Date();
-  setTimeout(fetchFeed, doc.interval ? doc.interval : (((endtime - starttime) * 5) + 20000));
+  setTimeout(fetchFeed, doc.interval ? doc.interval : (endtime - starttime) * 5 + 10000);
 }
 
-stdin.on('data', function (chunk) {
+stdin.on('data', function(chunk) {
   buffer += chunk.toString();
   while (buffer.indexOf('\n') !== -1) {
     line = buffer.slice(0, buffer.indexOf('\n'));
     buffer = buffer.slice(buffer.indexOf('\n') + 1);  
     var obj = JSON.parse(line);
+    if (obj[0] === "db") {
+      feedDB = obj[1];
+    }
     if (obj[0] === "doc") {
+      feedDoc = obj[1];
       fetchFeed(obj[1]);
+    }
+    if (obj[0] === "update") {
+      feedDoc = obj[1];
+    }
+    if (obj[0] === "debug") {
+      debug = true;
     }
   }
 });

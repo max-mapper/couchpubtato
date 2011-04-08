@@ -1,0 +1,125 @@
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/svn/!svn/ver/397/trunk/hub/feed_diff_testdata
+END
+rss_no_link.xml
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/275/trunk/hub/feed_diff_testdata/rss_no_link.xml
+END
+entity_escaping.xml
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/27/trunk/hub/feed_diff_testdata/entity_escaping.xml
+END
+bad_atom_feed.xml
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/36/trunk/hub/feed_diff_testdata/bad_atom_feed.xml
+END
+rss2_only_title.xml
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/128/trunk/hub/feed_diff_testdata/rss2_only_title.xml
+END
+rss2sample.xml
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/147/trunk/hub/feed_diff_testdata/rss2sample.xml
+END
+rdf_10_weirdness.xml
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/359/trunk/hub/feed_diff_testdata/rdf_10_weirdness.xml
+END
+xhtml_entities.xml
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/291/trunk/hub/feed_diff_testdata/xhtml_entities.xml
+END
+rss_rdf.xml
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/228/trunk/hub/feed_diff_testdata/rss_rdf.xml
+END
+parsing.xml
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/128/trunk/hub/feed_diff_testdata/parsing.xml
+END
+sampleRss091.xml
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/128/trunk/hub/feed_diff_testdata/sampleRss091.xml
+END
+sampleRss092.xml
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/128/trunk/hub/feed_diff_testdata/sampleRss092.xml
+END
+no_xml_header.xml
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/36/trunk/hub/feed_diff_testdata/no_xml_header.xml
+END
+missing_entry_id.xml
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/36/trunk/hub/feed_diff_testdata/missing_entry_id.xml
+END
+rss2_only_link.xml
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/128/trunk/hub/feed_diff_testdata/rss2_only_link.xml
+END
+whitespace_id.xml
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/!svn/ver/312/trunk/hub/feed_diff_testdata/whitespace_id.xml
+END
+atom_no_id.xml
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/275/trunk/hub/feed_diff_testdata/atom_no_id.xml
+END
+bad_feed.xml
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/275/trunk/hub/feed_diff_testdata/bad_feed.xml
+END
+cdata_test.xml
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/!svn/ver/397/trunk/hub/feed_diff_testdata/cdata_test.xml
+END
+atom_namespace.xml
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/359/trunk/hub/feed_diff_testdata/atom_namespace.xml
+END
+attribute_escaping.xml
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/47/trunk/hub/feed_diff_testdata/attribute_escaping.xml
+END

@@ -1,6 +1,6 @@
 # work in progress
 
-uses node to archive rss feeds and stores the articles in couchdb
+uses node to archive rss/atom feeds and stores the articles in couchdb
 
 to try out:
 
@@ -8,6 +8,7 @@ to try out:
     # start couchdb
     # clone this repo
     npm install request
+    npm install jsdom
     git submodule init
     git submodule update
     ruby create_test_data.rb
