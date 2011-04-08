@@ -1,11 +1,11 @@
 var stdin = process.openStdin(),
     sys = require('sys'),
     dbemitter = require('./dbemitter/main'),
-    request = require('request'),
     child = require('child_process'),
     path = require('path'),
     db = process.argv[2],
-    h = {'content-type':'application/json', 'accept':'application/json'},
+    url = require('url'),
+    couch = url.parse(db),
     emitter = dbemitter.createCouchDBEmitter(db),
     children = {};
     
@@ -23,6 +23,7 @@ var spawnFeedProcess = function( doc ) {
 emitter.on('change', function (change) {
   var doc = change.doc;
   if (doc.feed && doc.db) {
+    doc.couch = couch.protocol + "//" + couch.host;
     spawnFeedProcess(doc);
   }
 });
