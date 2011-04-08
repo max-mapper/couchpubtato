@@ -1,0 +1,6 @@
+[submodule "dbemitter"]
+	path = dbemitter
+	url = https://github.com/mikeal/dbemitter.git
+[submodule "node-xml2js"]
+	path = node-xml2js
+	url = https://maxogden@github.com/maxogden/node-xml2js.git
