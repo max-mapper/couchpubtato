@@ -11,6 +11,6 @@ to try out:
     git submodule init
     git submodule update
     ruby create_test_data.rb
-    node db-watcher.js
+    node db-watcher.js http://localhost:5984/feeds
 
 then look in the 'articles' database on couch :)
