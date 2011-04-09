@@ -7,10 +7,9 @@ var fs = require('fs'),
     crypto = require('crypto'),
     headers = {'content-type':'application/json', 'accept':'application/json'},
     stdin = process.openStdin(),
+    stdout = process.stdout,
     buffer = '',
-    feedDoc = {},
-    fetchCount = 1,
-    debug = false;
+    feedDoc;
     
     // for debugging. run via: node feed-archiver.js debug
     if (process.argv[2]) {
@@ -23,9 +22,23 @@ var fs = require('fs'),
       })
     }
 
+
+function zeroPad(n) {
+  return n < 10 ? '0' + n : n;
+}
+
+function rfc3339(date) {
+  return date.getUTCFullYear()   + '-' +
+    zeroPad(date.getUTCMonth() + 1) + '-' +
+    zeroPad(date.getUTCDate())      + 'T' +
+    zeroPad(date.getUTCHours())     + ':' +
+    zeroPad(date.getUTCMinutes())   + ':' +
+    zeroPad(date.getUTCSeconds())   + 'Z';
+};
+
 function processFeed(feedUrl, callback) {
   var feed = url.parse(feedUrl);
-  if (debug) sys.debug("executing fetch #" + fetchCount + " for " + feedUrl);
+  stdout.write(JSON.stringify(["debug", "executing fetch #" + feedDoc.count || 1 + " for " + feedUrl])+'\n');  
   request({uri:feed.href, headers: {'host' : feed.host}}, function (error, resp, body) {
     if (error) throw error;
     jsdom.env(body, ['jquery.js', 'jfeed.js', 'jatom.js', 'jfeeditem.js', 'jrss.js'], function(errors, window) {
@@ -36,6 +49,12 @@ function processFeed(feedUrl, callback) {
 }
 
 function saveMetadata(feed, doc) {
+  if ( doc.count ) {
+    doc.count++;
+  } else {
+    doc.count = 1;
+  }
+  doc.updated_at = rfc3339(new Date());
   doc.type = feed.type;
   doc.version = feed.version;
   doc.title = feed.title;
@@ -45,7 +64,7 @@ function saveMetadata(feed, doc) {
   request({ method: "put", uri:feedDoc, body: JSON.stringify(doc), headers:headers},
     function(err, resp, body) {
       if (err) return sys.error(err.stack);
-      if (debug) sys.debug("saved feed doc: " + JSON.stringify(body));
+      stdout.write(JSON.stringify(["update", body])+'\n'); 
     }
   );
 }
@@ -61,7 +80,7 @@ function saveItem(item, couch, db, uniqueKey) {
         request({ method: "put", uri:doc_uri, body: JSON.stringify(item), headers:headers},
           function(err, resp, body) {
             if (err) return sys.error(err.stack);
-            if (debug) sys.debug("saved " + body);
+            stdout.write(JSON.stringify(["debug", "saved " + body])+'\n');
           }
         );
       }
@@ -73,13 +92,8 @@ function fetchFeed() {
   var doc = feedDoc;
   var starttime = new Date();   
   processFeed(doc.feed, function(feed) {
-    if ( feed.type === '' && debug ) sys.debug("could not identify feed type for " + doc.feed);
-    if ( fetchCount === 1 ) {
-      saveMetadata(feed, feedDoc);
-      fetchCount++;
-    } else {
-      fetchCount++;
-    }
+    if ( feed.type === '' ) stdout.write(JSON.stringify(["debug", "Error parsing " + doc.feed])+'\n');
+    saveMetadata(feed, feedDoc);
     var items = feed.items;
     if (items) {
       for (var item in items) {
@@ -88,7 +102,8 @@ function fetchFeed() {
     }
   });
   var endtime = new Date();
-  setTimeout(fetchFeed, doc.interval ? doc.interval : (endtime - starttime) * 5 + 10000);
+  var duration = endtime - starttime;
+  stdout.write(JSON.stringify(["finished", duration])+'\n');
 }
 
 stdin.on('data', function(chunk) {
@@ -103,12 +118,6 @@ stdin.on('data', function(chunk) {
     if (obj[0] === "doc") {
       feedDoc = obj[1];
       fetchFeed(obj[1]);
-    }
-    if (obj[0] === "update") {
-      feedDoc = obj[1];
-    }
-    if (obj[0] === "debug") {
-      debug = true;
     }
   }
 });

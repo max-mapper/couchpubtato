@@ -8,27 +8,58 @@ var stdin = process.openStdin(),
     couch = url.parse(db),
     emitter = dbemitter.createCouchDBEmitter(db),
     debug = false,
+    workers = 20,
     children = {};
     
 stdin.setEncoding('utf8');
 
-if ( process.argv[3] === "debug" ) debug = true;
+if ( process.argv[3] === "debug" ) {
+  debug = true;
+  sys.log("debug mode");
+}
 
 var spawnFeedProcess = function( doc ) {
-  if (debug) sys.debug( "Starting process for " + doc.feed )
+  var buffer = '';
+  if (debug) sys.log( "Starting process for " + doc.feed )
   var p = child.spawn( process.execPath, [ path.join(__dirname, 'feed-archiver.js') ] );
+  children[ doc._id ] = {'doc': doc, 'feed_process': function() { return p }};
   p.stderr.on( "data", function ( chunk ) { sys.error( "stderr: " + chunk.toString() ) } )
-  p.stdout.on( "data", function ( chunk ) { sys.error( "stdout: " + chunk.toString() ) } )
-  if (debug) p.stdin.write(JSON.stringify(["debug"])+'\n');
+  p.stdout.on( 'data', function( chunk ) {
+    buffer += chunk.toString();
+    while (buffer.indexOf('\n') !== -1) {
+      line = buffer.slice(0, buffer.indexOf('\n'));
+      buffer = buffer.slice(buffer.indexOf('\n') + 1);  
+      var obj = JSON.parse(line);
+      if (obj[0] === "debug") {
+        if (debug) sys.log(obj[1]);
+      }
+      if (obj[0] === "update") {
+        var newDoc = JSON.parse(obj[1]);
+        children[doc._id].doc._rev = newDoc.rev;
+        if (debug) sys.log("updated " + JSON.stringify(newDoc));
+      }
+      if (obj[0] === "finished") {
+        var duration = obj[1];
+        if (debug) sys.log("killing process for " + doc.feed);
+        var nextRun = doc.interval ? doc.interval : (duration) * 5 + 10000;
+        if(debug) sys.log(doc._id + ' next run in ' + nextRun);
+        setTimeout(function() {
+          sys.log("doc : " + JSON.stringify(children[doc._id].doc));
+          spawnFeedProcess(children[doc._id].doc);
+        }, nextRun);
+      }
+    }
+  });
   p.stdin.write(JSON.stringify(["db", couch.pathname.replace('/','')])+'\n');
   p.stdin.write(JSON.stringify(["doc", doc])+'\n');
-  children[ doc._id ] = {'feed_process': function() { return p }};
 }
 
 emitter.on('change', function (change) {
   if (change.doc._id in children) {
-    var worker = children[change.doc._id].feed_process()
-    worker.stdin.write(JSON.stringify(["update", change.doc])+'\n');
+    if ('feed_process' in children[change.doc._id]) {
+      var worker = children[change.doc._id].feed_process();
+      worker.stdin.write(JSON.stringify(["update", change.doc])+'\n');
+    }
     return;
   };
   var doc = change.doc;
