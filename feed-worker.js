@@ -11,15 +11,17 @@ var fs = require('fs'),
     buffer = '',
     feedDoc;
     
-    // for debugging. run via: node feed-archiver.js debug
-    if (process.argv[2]) {
-      fetchFeed({
+    // for debugging. run via: node feed-worker.js debug
+    if ( process.argv[2] === "debug" ) {
+      feedDoc = {
        "_id": "fdfb25620af1adcf55083e3fd80155e2",
        "_rev": "1-1ec61ec9658c6da3bf364018e19f4e37",
        "feed": "http://www.nytimes.com/services/xml/rss/nyt/pop_top.xml",
        "db": "articles",
        "couch": "http://localhost:5984"
-      })
+      }
+      feedDB = "feeds";
+      fetchFeed();
     }
 
 
@@ -36,11 +38,11 @@ function rfc3339(date) {
     zeroPad(date.getUTCSeconds())   + 'Z';
 };
 
-function processFeed(feedUrl, callback) {
+function processFeed(feedUrl, callback) {  
   var feed = url.parse(feedUrl);
-  stdout.write(JSON.stringify(["debug", "executing fetch #" + feedDoc.count || 1 + " for " + feedUrl])+'\n');  
-  request({uri:feed.href, headers: {'host' : feed.host}}, function (error, resp, body) {
-    if (error) throw error;
+  stdout.write(JSON.stringify(["debug", "executing fetch #" + feedDoc.count + " for " + feed.href])+'\n');  
+  request({uri:feed.href}, function (error, resp, body) {
+    if (error) stdout.write(JSON.stringify(["error", sys.error(error.stack)])+'\n');
     jsdom.env(body, ['jquery.js', 'jfeed.js', 'jatom.js', 'jfeeditem.js', 'jrss.js'], function(errors, window) {
       var jf = new window.JFeed(window.document);
       callback(jf);
@@ -63,7 +65,8 @@ function saveMetadata(feed, doc) {
   var feedDoc = doc.couch + "/" + feedDB + "/" + doc._id;
   request({ method: "put", uri:feedDoc, body: JSON.stringify(doc), headers:headers},
     function(err, resp, body) {
-      if (err) return sys.error(err.stack);
+      if (err) stdout.write(JSON.stringify(["error", sys.error(err.stack)])+'\n');
+      stdout.write(JSON.stringify(["debug", "saveMetadata: " + body])+'\n');
       stdout.write(JSON.stringify(["update", body])+'\n'); 
     }
   );
@@ -79,7 +82,7 @@ function saveItem(item, couch, db, uniqueKey) {
       if (body.error == "not_found") {
         request({ method: "put", uri:doc_uri, body: JSON.stringify(item), headers:headers},
           function(err, resp, body) {
-            if (err) return sys.error(err.stack);
+            if (err) stdout.write(JSON.stringify(["error", sys.error(err.stack)])+'\n');
             stdout.write(JSON.stringify(["debug", "saved " + body])+'\n');
           }
         );
@@ -90,7 +93,7 @@ function saveItem(item, couch, db, uniqueKey) {
 
 function fetchFeed() {
   var doc = feedDoc;
-  var starttime = new Date();   
+  stdout.write(JSON.stringify(["starttime", new Date()])+'\n');    
   processFeed(doc.feed, function(feed) {
     if ( feed.type === '' ) stdout.write(JSON.stringify(["debug", "Error parsing " + doc.feed])+'\n');
     saveMetadata(feed, feedDoc);
@@ -101,9 +104,7 @@ function fetchFeed() {
       } 
     }
   });
-  var endtime = new Date();
-  var duration = endtime - starttime;
-  stdout.write(JSON.stringify(["finished", duration])+'\n');
+  stdout.write(JSON.stringify(["endtime", new Date()])+'\n');
 }
 
 stdin.on('data', function(chunk) {
