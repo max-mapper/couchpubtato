@@ -8,7 +8,7 @@ var stdin = process.openStdin(),
     couch = url.parse(db),
     emitter = dbemitter.createCouchDBEmitter(db),
     debug = false,
-    workers = 20,
+    maxWorkers = 20,
     children = {};
     
 stdin.setEncoding('utf8');
@@ -16,6 +16,30 @@ stdin.setEncoding('utf8');
 if ( process.argv[3] === "debug" ) {
   debug = true;
   sys.log("debug mode");
+}
+
+function queueFetch(doc) {
+  if (debug) sys.log("queue length " + childProcesses().length);
+  if ( childProcesses().length < maxWorkers ) {
+    spawnFeedProcess(doc);
+  } else {
+    if (debug) sys.log("queueing " + doc._id);
+    setTimeout(function(doc) {
+      return function() {
+        queueFetch(doc);
+      }
+    }(doc), 5000);
+  }
+}
+
+function childProcesses() {
+  var processes = [];
+  for (var child in children) {
+    if ( "feed_process" in children[child] ) {
+      processes.push(children[child].feed_process);
+    }
+  }
+  return processes;
 }
 
 var spawnFeedProcess = function( doc ) {
@@ -47,7 +71,8 @@ var spawnFeedProcess = function( doc ) {
         var duration = obj[1];
         if (debug) sys.log("killing process for " + doc.feed);
         children[doc._id].feed_process().kill('SIGHUP');
-        var nextRun = doc.interval ? doc.interval : (duration) * 5 + 10000;
+        delete children[doc._id].feed_process;
+        var nextRun = doc.interval ? doc.interval : (duration) * 5 + 100000;
         if(debug) sys.log(doc._id + ' next run in ' + nextRun);
         setTimeout(function() {
           spawnFeedProcess(children[doc._id].doc);
@@ -61,15 +86,11 @@ var spawnFeedProcess = function( doc ) {
 
 emitter.on('change', function (change) {
   if (change.doc._id in children) {
-    // if ('feed_process' in children[change.doc._id]) {
-    //   var worker = children[change.doc._id].feed_process();
-    //   worker.stdin.write(JSON.stringify(["update", change.doc])+'\n');
-    // }
     return;
   };
   var doc = change.doc;
   if (doc.feed && doc.db) {
     doc.couch = couch.protocol + "//" + couch.host;
-    spawnFeedProcess(doc);
+    queueFetch(doc);
   }
 });
