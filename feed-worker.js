@@ -65,17 +65,17 @@ function saveMetadata(feed, doc) {
   } else {
     doc.count = 1;
   }
+  feedDoc.count = doc.count;
   doc.updated_at = rfc3339(new Date());
   doc.type = feed.type;
   doc.version = feed.version;
   doc.title = feed.title;
   doc.link = feed.link;
   doc.description = feed.description;
-  feedDoc = doc.couch + "/" + feedDB + "/" + doc._id;
-  request({ method: "put", uri:feedDoc, body: JSON.stringify(doc), headers:headers},
+  var url = doc.couch + "/" + feedDB + "/" + doc._id;
+  request({ method: "put", uri:url, body: JSON.stringify(doc), headers:headers},
     function(err, resp, body) {
       if (err) stdout.write(JSON.stringify(["error", sys.error(err.stack)])+'\n');
-      feedDoc._rev = JSON.parse(body).rev;
       stdout.write(JSON.stringify(["update", body])+'\n');
       checkIfDone();
     }
@@ -104,18 +104,24 @@ function saveItem(item, couch, db, uniqueKey) {
 }
 
 function fetchFeed() {
-  var doc = feedDoc;
-  processFeed(doc.feed, function(feed) {
-    if ( feed.type === '' ) stdout.write(JSON.stringify(["debug", "Error parsing " + doc.feed])+'\n');
-    if ( feed.items && feed.items.length > 0 ) {
-      pendingRequests = feed.items.length + 1;
-      saveMetadata(feed, feedDoc);
-      var items = feed.items;
-      for (var item in items) {
-        saveItem(items[item], doc.couch, doc.db, "description");
-      } 
-    }
-  });
+  var url = feedDoc.couch + "/" + feedDB + "/" + feedDoc._id;
+  
+  request({uri: url, headers: headers}, function (err, resp, body) {  
+    if (err) throw err;
+    feedDoc = JSON.parse(body);
+    var doc = feedDoc;
+    processFeed(doc.feed, function(feed) {
+      if ( feed.type === '' ) stdout.write(JSON.stringify(["debug", "Error parsing " + doc.feed])+'\n');
+      if ( feed.items && feed.items.length > 0 ) {
+        pendingRequests = feed.items.length + 1;
+        saveMetadata(feed, feedDoc);
+        var items = feed.items;
+        for (var item in items) {
+          saveItem(items[item], doc.couch, doc.db, "description");
+        } 
+      }
+    });
+  })
 }
 
 stdin.on('data', function(chunk) {
