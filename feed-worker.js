@@ -64,7 +64,7 @@ function saveMetadata(feed, doc) {
     doc.count++;
   } else {
     doc.count = 1;
-  }
+  }  
   feedDoc.count = doc.count;
   doc.updated_at = rfc3339(new Date());
   doc.type = feed.type;
@@ -108,8 +108,9 @@ function fetchFeed() {
   
   request({uri: url, headers: headers}, function (err, resp, body) {  
     if (err) stdout.write(JSON.stringify(["error", sys.error(err.stack)])+'\n');
-    feedDoc = JSON.parse(body);
-    var doc = feedDoc;
+    var newDoc = JSON.parse(body);
+    if ( !newDoc.couch ) newDoc.couch = feedDoc.couch;
+    var doc = feedDoc = newDoc;
     processFeed(doc.feed, function(feed) {
       if ( feed.type === '' ) stdout.write(JSON.stringify(["debug", "Error parsing " + doc.feed])+'\n');
       if ( feed.items && feed.items.length > 0 ) {
