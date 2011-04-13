@@ -107,7 +107,7 @@ function fetchFeed() {
   var url = feedDoc.couch + "/" + feedDB + "/" + feedDoc._id;
   
   request({uri: url, headers: headers}, function (err, resp, body) {  
-    if (err) throw err;
+    if (err) stdout.write(JSON.stringify(["error", sys.error(err.stack)])+'\n');
     feedDoc = JSON.parse(body);
     var doc = feedDoc;
     processFeed(doc.feed, function(feed) {
