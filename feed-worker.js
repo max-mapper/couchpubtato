@@ -9,6 +9,8 @@ var fs = require('fs'),
     stdin = process.openStdin(),
     stdout = process.stdout,
     buffer = '',
+    startTime = new Date(),
+    pendingRequests = 0,
     feedDoc;
     
     // for debugging. run via: node feed-worker.js debug
@@ -38,6 +40,13 @@ function rfc3339(date) {
     zeroPad(date.getUTCSeconds())   + 'Z';
 };
 
+function checkIfDone() {
+  pendingRequests--;
+  if ( pendingRequests === 0 ) {    
+    stdout.write(JSON.stringify(["finished", new Date() - startTime])+'\n');
+  }
+};
+
 function processFeed(feedUrl, callback) {  
   var feed = url.parse(feedUrl);
   stdout.write(JSON.stringify(["debug", "executing fetch #" + feedDoc.count + " for " + feed.href])+'\n');  
@@ -62,12 +71,13 @@ function saveMetadata(feed, doc) {
   doc.title = feed.title;
   doc.link = feed.link;
   doc.description = feed.description;
-  var feedDoc = doc.couch + "/" + feedDB + "/" + doc._id;
+  feedDoc = doc.couch + "/" + feedDB + "/" + doc._id;
   request({ method: "put", uri:feedDoc, body: JSON.stringify(doc), headers:headers},
     function(err, resp, body) {
       if (err) stdout.write(JSON.stringify(["error", sys.error(err.stack)])+'\n');
-      stdout.write(JSON.stringify(["debug", "saveMetadata: " + body])+'\n');
-      stdout.write(JSON.stringify(["update", body])+'\n'); 
+      feedDoc._rev = JSON.parse(body).rev;
+      stdout.write(JSON.stringify(["update", body])+'\n');
+      checkIfDone();
     }
   );
 }
@@ -83,28 +93,29 @@ function saveItem(item, couch, db, uniqueKey) {
         request({ method: "put", uri:doc_uri, body: JSON.stringify(item), headers:headers},
           function(err, resp, body) {
             if (err) stdout.write(JSON.stringify(["error", sys.error(err.stack)])+'\n');
-            stdout.write(JSON.stringify(["debug", "saved " + body])+'\n');
+            checkIfDone();
           }
         );
       }
+    } else {
+      checkIfDone();
     } 
   });
 }
 
 function fetchFeed() {
   var doc = feedDoc;
-  stdout.write(JSON.stringify(["starttime", new Date()])+'\n');    
   processFeed(doc.feed, function(feed) {
     if ( feed.type === '' ) stdout.write(JSON.stringify(["debug", "Error parsing " + doc.feed])+'\n');
-    saveMetadata(feed, feedDoc);
-    var items = feed.items;
-    if (items) {
+    if ( feed.items && feed.items.length > 0 ) {
+      pendingRequests = feed.items.length + 1;
+      saveMetadata(feed, feedDoc);
+      var items = feed.items;
       for (var item in items) {
         saveItem(items[item], doc.couch, doc.db, "description");
       } 
     }
   });
-  stdout.write(JSON.stringify(["endtime", new Date()])+'\n');
 }
 
 stdin.on('data', function(chunk) {

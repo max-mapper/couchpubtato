@@ -20,6 +20,7 @@ if ( process.argv[3] === "debug" ) {
 
 var spawnFeedProcess = function( doc ) {
   var buffer = "";
+  var count = 0;
   if (debug) sys.log( "Starting process for " + doc.feed )
   var p = child.spawn( process.execPath, [ path.join(__dirname, "feed-worker.js") ] );
   children[ doc._id ] = {"doc": doc, "feed_process": function() { return p }};
@@ -37,28 +38,23 @@ var spawnFeedProcess = function( doc ) {
         sys.log("Error: " + obj[1]);
       }
       if (obj[0] === "update") {
+        count--;
         var newDoc = JSON.parse(obj[1]);
         children[doc._id].doc._rev = newDoc.rev;
         if (debug) sys.log("updated " + JSON.stringify(newDoc));
       }
-      if (obj[0] === "starttime") {        
-        children[ doc._id ].starttime = obj[1];
-      }
-      if (obj[0] === "endtime") {        
-        children[ doc._id ].endtime = obj[1];
+      if (obj[0] === "finished") {        
+        var duration = obj[1];
+        if (debug) sys.log("killing process for " + doc.feed);
+        children[doc._id].feed_process().kill('SIGHUP');
+        var nextRun = doc.interval ? doc.interval : (duration) * 5 + 10000;
+        if(debug) sys.log(doc._id + ' next run in ' + nextRun);
+        setTimeout(function() {
+          spawnFeedProcess(children[doc._id].doc);
+        }, nextRun);     
       }
     }
   });
-  p.stdout.on("end", function (){
-    var duration = endtime - starttime;
-    if (debug) sys.log("killing process for " + doc.feed);
-    children[doc._id].feed_process().kill('SIGHUP');
-    var nextRun = doc.interval ? doc.interval : (duration) * 5 + 10000;
-    if(debug) sys.log(doc._id + ' next run in ' + nextRun);
-    setTimeout(function() {
-      spawnFeedProcess(children[doc._id].doc);
-    }, nextRun);
-  })
   p.stdin.write(JSON.stringify(["db", couch.pathname.replace('/','')])+'\n');
   p.stdin.write(JSON.stringify(["doc", doc])+'\n');
 }
