@@ -1,0 +1,111 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="utf-8"> 
+	<title>Couchpubtato Feed Viewer</title> 
+	<link rel="stylesheet" href="style/reset.css" media="screen">
+	<link rel="stylesheet" href="style/demo.css" media="screen">
+	<link rel="stylesheet" href="style/css3buttons.css" media="screen"> 
+	<script type="text/javascript" src="script/jquery-1.5.min.js"></script>
+	<script type="text/javascript" src="script/jquery.mustache.js"></script>
+	<script type="text/javascript" src="script/jquery.cluetip.js"></script>
+  <script type="text/javascript" src="script/jquery.timeago.js"></script>
+  <script type="text/javascript" src="script/jquery.couch.js"></script>
+  <script type="text/javascript" src="script/jquery.couch.app.js"></script>
+  <script type="text/javascript" src="script/couchpubtato_viewer.js"></script>
+
+</head> 
+<body>
+	<div class="container">
+		<header>
+			<h1 id="title">Couchpubtato Feed Viewer</h1>
+		</header>
+		
+		<div id="main">
+			<section class="odd">				
+				<p>
+          <div id="stats"></div>
+        </p>
+			</section>
+			<div id="stream"></div>
+			<div class="loader">
+        <img src="images/loading-bar.gif"></img>
+      </div>
+		</div>
+		
+		<footer>
+			<a href='https://github.com/maxogden/couchpubtato'>Fork this project on Github</a>. The <a href="http://github.com/michenriksen/css3buttons">pretty CSS3 Buttons</a> were created by <a href="http://michaelhenriksen.dk" title="Website of Michael Henriksen">Michael Henriksen</a>
+		</footer>
+	</div>
+
+  <script type='text/mustache' id="dbTemplate">
+    <div id="database" class="single_database">
+      <div class="group" id="current-head-database">
+        <table width="100%" cellspacing="0" cellpadding="0">
+          <tbody>
+            <tr class="database_oneline action">
+              <td class="date">
+                <nobr>db</nobr>
+              </td>
+              <td class="message">
+                <code><a href="http://{{host}}/{{db_name}}">http://{{host}}/<strong>{{db_name}}</strong></a> </code>
+              </td>
+              <td class="database">
+                size&nbsp;{{disk_size}}
+              </td>
+              <td class="tree">
+                docs&nbsp;<a href="http://{{host}}/{{db_name}}/_all_docs?include_docs=true" hotkey="t">{{doc_count}}</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </script>
+
+  <script type="text/mustache" id="streamTemplate">
+    <div class="span-19 last" id="items">
+      <div id="main_stream" class="stream">
+      {{#items}}
+        <div class="stream_element" data-post-id="{{id}}" data-created-at="{{created_at}}">
+          {{#profile}}
+          <div class="right hidden controls">
+            <a class="delete" href="#">
+              <img src="/images/deletelabel.png" />
+            </a>
+          </div>
+          {{/profile}}
+          <a href="#">
+            {{#gravatar_url}}<img class="avatar" src="{{gravatar_url}}" />{{/gravatar_url}}
+          </a>
+          <div class='content'>
+            <div class='from'>
+              <a class='author hover_profile' rel='#profile_{{nickname}}_{{randomToken}}' title="{{nickname}}'s info" href='#'>
+                {{nickname}}
+              </a>
+              <p></p>
+              {{#message}}
+              	{{text}}
+              {{/message}}
+            </div>
+            <div class="info">
+              <span class="aspect_badges">
+                <span class="aspect_badge public">
+                  public
+                </span>
+              </span>
+              <span class="timeago" title="{{created_at}}">a while ago</span>
+            </div>
+          </div>
+        </div>
+        <p id='profile_{{nickname}}_{{randomToken}}' style="display:none">
+          OStatus Address: {{name}}@{{host}}<br>
+          {{#url}}URL: <a href='{{.}}' target='_blank'>{{.}}</a><br>{{/url}}
+          Atom Feed: <a href='{{base_url}}feeds/{{name}}' target='_blank'>{{name}}.atom</a>
+      	</p>
+      {{/items}}
+      </div>
+    </div>
+  </script>
+</body>
+</html>
