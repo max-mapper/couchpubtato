@@ -101,7 +101,6 @@ var monocles = {
 
     function renderStream(posts) {
       monocles.hideLoader();
-
       if ( posts.length > 0 ) {
         var append = true;
         if ( opts.reload ) append = false;
@@ -116,7 +115,6 @@ var monocles = {
       "descending" : true,
       "limit" : 20,
       success: function( data ) {
-        console.log(data)
         if( data.rows.length === 0 ) {
           monocles.oldestDoc = false;
           monocles.hideLoader();
@@ -141,14 +139,16 @@ var monocles = {
   },
 
   renderPosts: function( posts ) {
-    return $(posts).map(function(i, r) {
-      return {
+    var data = [];
+    $.each(posts, function(i, r) {
+      data.push({
         message : r.value.description,
         id: r.id,
         db : monocles.config.db,
         host: monocles.config.host
-      }
-    })
+      })
+    })    
+    return {items: data};
   },
   
   bindInfiniteScroll: function() {
