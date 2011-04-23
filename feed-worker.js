@@ -16,16 +16,13 @@ var fs = require('fs'),
     // for debugging. run via: node feed-worker.js debug
     if ( process.argv[2] === "debug" ) {
       feedDoc = {
-       "_id": "fdfb25620af1adcf55083e3fd80155e2",
-       "_rev": "1-1ec61ec9658c6da3bf364018e19f4e37",
-       "feed": "http://www.nytimes.com/services/xml/rss/nyt/pop_top.xml",
-       "db": "articles",
+       "_id": "a173fb6dcfdb7f01c27a3f1cbb8dd7c2",
+       "_rev": "2-427e4796a4262aa85f71b8d77cf8b50c",
        "couch": "http://localhost:5984"
       }
-      feedDB = "feeds";
+      feedDB = "nytimes";
       fetchFeed();
     }
-
 
 function zeroPad(n) {
   return n < 10 ? '0' + n : n;
@@ -52,7 +49,13 @@ function processFeed(feedUrl, callback) {
   stdout.write(JSON.stringify(["debug", "executing fetch #" + feedDoc.count + " for " + feed.href])+'\n');  
   request({uri:feed.href}, function (error, resp, body) {
     if (error) stdout.write(JSON.stringify(["error", sys.error(error.stack)])+'\n');
-    jsdom.env(body, ['jquery.js', 'jfeed.js', 'jatom.js', 'jfeeditem.js', 'jrss.js'], function(errors, window) {
+    var jsLibs = ['jfeed.js', 'jatom.js', 'jfeeditem.js', 'jrss.js', 'jactivitystream.js'];
+    jsLibs = jsLibs.map(function(lib) {
+      return "./jFeed/src/" + lib;
+    })
+    jsLibs.unshift('jFeed/jquery/jquery.js');
+    stdout.write(JSON.stringify(["debug", JSON.stringify(jsLibs)])+'\n');
+    jsdom.env(body, jsLibs, function(errors, window) {
       var jf = new window.JFeed(window.document);
       callback(jf);
     });

@@ -4,3 +4,6 @@
 [submodule "node-xml2js"]
 	path = node-xml2js
 	url = https://maxogden@github.com/maxogden/node-xml2js.git
+[submodule "jFeed"]
+	path = jFeed
+	url = git@github.com:maxogden/jFeed.git
