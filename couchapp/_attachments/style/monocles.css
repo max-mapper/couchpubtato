@@ -355,6 +355,14 @@ h1.big_text {
   border-top: 1px solid #999999;
   border-bottom: 2px solid #eeeeee; }
 
+.loader {
+  width: 128px;
+  margin: 30px auto 0px auto;
+}
+
+.hidden {
+  display: none; }
+
 .show_post_comments ul.comment_set {
   width: 100%; }
 

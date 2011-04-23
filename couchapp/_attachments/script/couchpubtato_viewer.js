@@ -64,7 +64,7 @@ var monocles = {
     var html = $.mustache( $( "#" + template + "Template" ).text(), data ),
         targetDom = $( "#" + target );
     if( append ) {
-      targetDom.append( html );    
+      targetDom.html( html );    
     } else {
       targetDom.html( html );
     }
@@ -90,6 +90,7 @@ var monocles = {
   },
   
   getPosts: function( opts ) {
+    console.log(monocles.oldestDoc)
     $.getJSON( monocles.config.baseURL + 'api', function( dbInfo ) {
       if( monocles.config.vhost ) dbInfo.db_name = 'api';
       monocles.render( 'db', 'stats', dbInfo );
