@@ -49,7 +49,7 @@ function processFeed(feedUrl, callback) {
   stdout.write(JSON.stringify(["debug", "executing fetch #" + feedDoc.count + " for " + feed.href])+'\n');  
   request({uri:feed.href}, function (error, resp, body) {
     if (error) stdout.write(JSON.stringify(["error", sys.error(error.stack)])+'\n');
-    var jsLibs = ['jfeed.js', 'jatom.js', 'jfeeditem.js', 'jrss.js', 'jactivitystream.js'];
+    var jsLibs = ['jfeed.js', 'jfeeditem.js', 'jactivitystream.js', 'jatom.js', 'jrss.js'];
     jsLibs = jsLibs.map(function(lib) {
       return "./jFeed/src/" + lib;
     })
