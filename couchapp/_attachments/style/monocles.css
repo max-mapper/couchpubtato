@@ -99,7 +99,7 @@
   top: -0.1em; }
 .stream .aspect_badge {
   top: -0.2em; }
- 
+
 .aspect_badge {
   color: white;
   line-height: auto;
@@ -214,7 +214,7 @@ ul.comment_set {
   list-style-type: none;
   margin: 0;
   padding: 0; }
-  
+
 .profile_setup label{
   position: relative !important;
 }

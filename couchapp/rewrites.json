@@ -1,22 +1,22 @@
 [
 	{
-		"to": "style/*", 
+		"to": "style/*",
 		"from": "style/*"
-	}, 
+	},
 	{
-		"to": "script/*", 
+		"to": "script/*",
 		"from": "script/*"
-	}, 
+	},
 	{
-		"to": "pages/*", 
+		"to": "pages/*",
 		"from": "pages/*"
 	},
 	{
-		"to": "images/*", 
+		"to": "images/*",
 		"from": "images/*"
-	}, 
+	},
 	{
-		"to": "pages/index.html", 
+		"to": "pages/index.html",
 		"from": ""
 	},
   {

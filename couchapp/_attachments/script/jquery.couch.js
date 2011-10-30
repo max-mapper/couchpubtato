@@ -22,7 +22,7 @@
     return encodeURIComponent(docID);
   };
 
-  function prepareUserDoc(user_doc, new_password) {    
+  function prepareUserDoc(user_doc, new_password) {
     if (typeof hex_sha1 == "undefined") {
       alert("creating a user doc requires sha1.js to be loaded in the page");
       return;
@@ -70,7 +70,7 @@
         }
       }
       if (value === null) {
-        req.type = "DELETE";        
+        req.type = "DELETE";
       } else if (value !== undefined) {
         req.type = "PUT";
         req.data = toJSON(value);
@@ -82,7 +82,7 @@
         "An error occurred retrieving/updating the server configuration"
       );
     },
-    
+
     session: function(options) {
       options = options || {};
       $.ajax({
@@ -109,7 +109,7 @@
       });
     },
 
-    signup: function(user_doc, password, options) {      
+    signup: function(user_doc, password, options) {
       options = options || {};
       // prepare user doc based on name and password
       user_doc = prepareUserDoc(user_doc, password);
@@ -117,7 +117,7 @@
         db.saveDoc(user_doc, options);
       });
     },
-    
+
     login: function(options) {
       options = options || {};
       $.ajax({
@@ -539,7 +539,7 @@
 
         setDbProperty: function(propName, propValue, options, ajaxOptions) {
           ajax({
-            type: "PUT", 
+            type: "PUT",
             url: this.uri + propName + encodeOptions(options),
             data : JSON.stringify(propValue)
           },
@@ -551,7 +551,7 @@
       };
     },
 
-    encodeDocId: encodeDocId, 
+    encodeDocId: encodeDocId,
 
     info: function(options) {
       ajax(

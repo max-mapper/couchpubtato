@@ -11,7 +11,7 @@
 // the License.
 
 // Usage: The passed in function is called when the page is ready.
-// CouchApp passes in the app object, which takes care of linking to 
+// CouchApp passes in the app object, which takes care of linking to
 // the proper database, and provides access to the CouchApp helpers.
 // $.couch.app(function(app) {
 //    app.db.view(...)
@@ -19,7 +19,7 @@
 // });
 
 (function($) {
-  
+
   function Design(db, name) {
     this.doc_id = "_design/"+name;
     this.view = function(view, opts) {
@@ -37,7 +37,7 @@
       var dname = opts.design || unescape(document.location.href).split('/')[5];
       var db = $.couch.db(dbname);
       var design = new Design(db, dname);
-      
+
       // docForm applies CouchDB behavior to HTML forms.
       // todo make this a couch.app plugin
       function docForm(formSelector, opts) {
@@ -68,7 +68,7 @@
             frontObj[frontName] = val;
           });
         }
-        
+
         // Apply the behavior
         $(formSelector).submit(function(e) {
           e.preventDefault();
@@ -80,7 +80,7 @@
               if (opts.success) {opts.success(resp, localFormDoc);}
             }
           });
-          
+
           return false;
         });
 
@@ -91,7 +91,7 @@
           opts.fields.forEach(function(field) {
             var parts = field.split('-');
             var run = true, frontObj = doc, frontName = parts.shift();
-            while (frontObj && parts.length > 0) {                
+            while (frontObj && parts.length > 0) {
               frontObj = frontObj[frontName];
               frontName = parts.shift();
             }
@@ -105,7 +105,7 @@
             }
           });
         }
-        
+
         if (opts.id) {
           db.openDoc(opts.id, {
             attachPrevRev : opts.attachPrevRev,
@@ -122,7 +122,7 @@
         var instance = {
           deleteDoc : function(opts) {
             opts = opts || {};
-            if (confirm("Really delete this document?")) {                
+            if (confirm("Really delete this document?")) {
               db.removeDoc(localFormDoc, opts);
             }
           },
@@ -133,7 +133,7 @@
         };
         return instance;
       }
-      
+
       function resolveModule(names, parent, current) {
         if (names.length === 0) {
           if (typeof current != "string") {
@@ -163,7 +163,7 @@
         current.parent = p;
         return resolveModule(names, p, current);
       }
-      
+
       var p = document.location.pathname.split('/');
       p.shift();
       var qs = document.location.search.replace(/^\?/,'').split('&');
@@ -182,7 +182,7 @@
         path : p,
         query : q
       };
-      
+
       var appExports = $.extend({
         db : db,
         design : design,
@@ -197,14 +197,14 @@
           var require = function(name, parent) {
             var exports = {};
             var resolved = resolveModule(name.split('/'), parent, ddoc);
-            var source = resolved[0]; 
+            var source = resolved[0];
             parent = resolved[1];
             var s = "var func = function (exports, require) { " + source + " };";
             try {
               eval(s);
               func.apply(ddoc, [exports, function(name) {return require(name, parent, source)}]);
-            } catch(e) { 
-              throw ["error","compilation_error","Module require('"+name+"') raised error "+e.toSource()]; 
+            } catch(e) {
+              throw ["error","compilation_error","Module require('"+name+"') raised error "+e.toSource()];
             }
             return exports;
           }
@@ -214,11 +214,11 @@
         // todo make app-exports the this in the execution context?
         appFun.apply(appExports, [appExports]);
       }
-      
+
     if ($.couch.app.ddocs[design.doc_id]) {
       handleDDoc($.couch.app.ddocs[design.doc_id])
     } else {
-      // only open 1 connection for this ddoc 
+      // only open 1 connection for this ddoc
       if ($.couch.app.ddoc_handlers[design.doc_id]) {
         // we are already fetching, just wait
         $.couch.app.ddoc_handlers[design.doc_id].push(handleDDoc);
@@ -241,7 +241,7 @@
         });
       }
     }
-      
+
     });
   };
   $.couch.app.ddocs = {};

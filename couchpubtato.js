@@ -10,7 +10,7 @@ var stdin = process.openStdin(),
     debug = false,
     maxWorkers = 20,
     children = {};
-    
+
 stdin.setEncoding('utf8');
 
 if ( process.argv[3] === "debug" ) {
@@ -53,7 +53,7 @@ var spawnFeedProcess = function( doc ) {
     buffer += chunk.toString();
     while (buffer.indexOf('\n') !== -1) {
       line = buffer.slice(0, buffer.indexOf('\n'));
-      buffer = buffer.slice(buffer.indexOf('\n') + 1);  
+      buffer = buffer.slice(buffer.indexOf('\n') + 1);
       var obj = JSON.parse(line);
       if (obj[0] === "debug") {
         if (debug) sys.log(obj[1]);
@@ -67,7 +67,7 @@ var spawnFeedProcess = function( doc ) {
         children[doc._id].doc._rev = newDoc.rev;
         if (debug) sys.log("updated " + JSON.stringify(newDoc));
       }
-      if (obj[0] === "finished") {        
+      if (obj[0] === "finished") {
         var duration = obj[1];
         if (debug) sys.log("killing process for " + doc.feed);
         children[doc._id].feed_process().kill('SIGHUP');
@@ -76,7 +76,7 @@ var spawnFeedProcess = function( doc ) {
         if(debug) sys.log(doc._id + ' next run in ' + nextRun);
         setTimeout(function() {
           spawnFeedProcess(children[doc._id].doc);
-        }, nextRun);     
+        }, nextRun);
       }
     }
   });
