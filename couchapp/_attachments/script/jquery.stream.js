@@ -1,10 +1,10 @@
 (function($) {
   $.stream = $.stream || {};
-  
+
   $.fn.stream = function(options) {
     options = $.extend(true, {}, $.fn.stream.defaults, options || {});
   }
-  
+
   $.fn.stream.defaults = {  // set up default options
     templateSelector: function(selector) { return "#" + selector + "Template" },
     infiniteScrollBuffer: 400,
@@ -13,7 +13,7 @@
   }
 
   $.extend($.stream, {
-    
+
     /** Uses mustache to render a template out to a target DOM
      *  template: camelcase ID (minus the word Template) of the DOM object containg your mustache template
      *  target: ID of the DOM node you wish to render the template into
@@ -25,12 +25,12 @@
       var html = $.mustache( $( $.stream.templateSelector(template) ).text(), data ),
           targetDom = $( "#" + target );
       if( append ) {
-        targetDom.append( html );    
+        targetDom.append( html );
       } else {
         targetDom.html( html );
       }
     },
-    
+
     bindInfiniteScroll: function() {
       var stream = this;
 
@@ -43,17 +43,17 @@
         if ( ! containerScrollTop ) {
           var ownerDoc = stream.infiniteScrollContainer.get().ownerDocument;
           if( ownerDoc ) {
-            containerScrollTop = $( ownerDoc.body ).scrollTop();        
+            containerScrollTop = $( ownerDoc.body ).scrollTop();
           }
         }
         var distanceToBottom = $( document ).height() - ( containerScrollTop + $( window ).height() );
 
-        if ( distanceToBottom < stream.infiniteScrollBuffer ) {  
+        if ( distanceToBottom < stream.infiniteScrollBuffer ) {
           stream.getPosts( { offsetDoc: stream.oldestDoc } );
         }
       });
     },
-    
+
     showLoader: function() {
       this.loaderDom.removeClass( 'hidden' );
     },

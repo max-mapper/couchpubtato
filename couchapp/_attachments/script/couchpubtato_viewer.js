@@ -30,11 +30,11 @@ var monocles = {
   db: function() {
     return $.couch.db( monocles.config.db );
   },
-  
+
   userProfile: function() {
     return $( '#header' ).data( 'profile' );
   },
-  
+
   // vhosts are when you mask couchapps behind a pretty URL
   inVhost: function() {
     var vhost = false;
@@ -43,16 +43,16 @@ var monocles = {
     }
     return vhost;
   },
-  
+
   // true if no admins exist in the database
   isAdminParty: function( userCtx ) {
     return userCtx.roles.indexOf("_admin") !== -1;
   },
-  
+
   formatDiskSize: function( bytes ) {
     return ( parseFloat( bytes ) / 1024 / 1024 ).toString().substr( 0 , 4 ) + "MB"
   },
-  
+
   /** Uses mustache to render a template out to a target DOM
    *  template: camelcase ID (minus the word Template) of the DOM object containg your mustache template
    *  target: ID of the DOM node you wish to render the template into
@@ -64,12 +64,12 @@ var monocles = {
     var html = $.mustache( $( "#" + template + "Template" ).text(), data ),
         targetDom = $( "#" + target );
     if( append ) {
-      targetDom.html( html );    
+      targetDom.html( html );
     } else {
       targetDom.html( html );
     }
   },
-  
+
   showLoader: function() {
     $( '.loader' ).removeClass( 'hidden' );
   },
@@ -83,19 +83,19 @@ var monocles = {
     if( $( '.loader' ).css( 'display' ) !== "none" ) showing = true;
     return showing;
   },
-  
+
   decorateStream: function() {
   	$( ".hover_profile" ).cluetip( { local: true, sticky: true, activation: "click" } );
     $( '.timeago' ).timeago();
   },
-  
+
   getPosts: function( opts ) {
     console.log(monocles.oldestDoc)
     $.getJSON( monocles.config.baseURL + 'api', function( dbInfo ) {
       if( monocles.config.vhost ) dbInfo.db_name = 'api';
       monocles.render( 'db', 'stats', dbInfo );
     } );
-    
+
     var opts = opts || {};
     if( opts.offsetDoc === false ) return;
     monocles.showLoader();
@@ -148,10 +148,10 @@ var monocles = {
         db : monocles.config.db,
         host: monocles.config.host
       })
-    })    
+    })
     return {items: data};
   },
-  
+
   bindInfiniteScroll: function() {
     var settings = {
       lookahead: 400,
@@ -167,12 +167,12 @@ var monocles = {
       if ( ! containerScrollTop ) {
         var ownerDoc = settings.container.get().ownerDocument;
         if( ownerDoc ) {
-          containerScrollTop = $( ownerDoc.body ).scrollTop();        
+          containerScrollTop = $( ownerDoc.body ).scrollTop();
         }
       }
       var distanceToBottom = $( document ).height() - ( containerScrollTop + $( window ).height() );
 
-      if ( distanceToBottom < settings.lookahead ) {  
+      if ( distanceToBottom < settings.lookahead ) {
         monocles.getPosts( { offsetDoc: monocles.oldestDoc } );
       }
     });

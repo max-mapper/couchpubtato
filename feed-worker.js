@@ -12,7 +12,7 @@ var fs = require('fs'),
     startTime = new Date(),
     pendingRequests = 0,
     feedDoc;
-    
+
     // for debugging. run via: node feed-worker.js debug
     if ( process.argv[2] === "debug" ) {
       feedDoc = {
@@ -39,14 +39,14 @@ function rfc3339(date) {
 
 function checkIfDone() {
   pendingRequests--;
-  if ( pendingRequests === 0 ) {    
+  if ( pendingRequests === 0 ) {
     stdout.write(JSON.stringify(["finished", new Date() - startTime])+'\n');
   }
 };
 
-function processFeed(feedUrl, callback) {  
+function processFeed(feedUrl, callback) {
   var feed = url.parse(feedUrl);
-  stdout.write(JSON.stringify(["debug", "executing fetch #" + feedDoc.count + " for " + feed.href])+'\n');  
+  stdout.write(JSON.stringify(["debug", "executing fetch #" + feedDoc.count + " for " + feed.href])+'\n');
   request({uri:feed.href}, function (error, resp, body) {
     if (error) stdout.write(JSON.stringify(["error", sys.error(error.stack)])+'\n');
     var jsLibs = ['jfeed.js', 'jfeeditem.js', 'jactivitystream.js', 'jatom.js', 'jrss.js'];
@@ -67,7 +67,7 @@ function saveMetadata(feed, doc) {
     doc.count++;
   } else {
     doc.count = 1;
-  }  
+  }
   feedDoc.count = doc.count;
   doc.updated_at = rfc3339(new Date());
   doc.type = feed.type;
@@ -86,9 +86,9 @@ function saveMetadata(feed, doc) {
 }
 
 function saveItem(item, couch, db, uniqueKey) {
-  var _id = crypto.createHash('md5').update(item[uniqueKey]).digest("hex");  
+  var _id = crypto.createHash('md5').update(item[uniqueKey]).digest("hex");
   var doc_uri = couch + "/" + db + "/" + _id;
-  request({uri:doc_uri, headers: headers}, function (err, resp, body) {  
+  request({uri:doc_uri, headers: headers}, function (err, resp, body) {
     if (err) throw err;
     body = JSON.parse(body);
     if("error" in body) {
@@ -102,14 +102,14 @@ function saveItem(item, couch, db, uniqueKey) {
       }
     } else {
       checkIfDone();
-    } 
+    }
   });
 }
 
 function fetchFeed() {
   var url = feedDoc.couch + "/" + feedDB + "/" + feedDoc._id;
-  
-  request({uri: url, headers: headers}, function (err, resp, body) {  
+
+  request({uri: url, headers: headers}, function (err, resp, body) {
     if (err) stdout.write(JSON.stringify(["error", sys.error(err.stack)])+'\n');
     var newDoc = JSON.parse(body);
     if ( !newDoc.couch ) newDoc.couch = feedDoc.couch;
@@ -122,7 +122,7 @@ function fetchFeed() {
         var items = feed.items;
         for (var item in items) {
           saveItem(items[item], doc.couch, doc.db, "description");
-        } 
+        }
       }
     });
   })
@@ -132,7 +132,7 @@ stdin.on('data', function(chunk) {
   buffer += chunk.toString();
   while (buffer.indexOf('\n') !== -1) {
     line = buffer.slice(0, buffer.indexOf('\n'));
-    buffer = buffer.slice(buffer.indexOf('\n') + 1);  
+    buffer = buffer.slice(buffer.indexOf('\n') + 1);
     var obj = JSON.parse(line);
     if (obj[0] === "db") {
       feedDB = obj[1];
